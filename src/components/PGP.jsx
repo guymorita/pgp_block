@@ -7,6 +7,8 @@ import {
   getFile
 } from 'blockstack'
 
+const FILE = 'pgp.json'
+
 export default class PGP extends Component {
   constructor(props) {
     super(props)
@@ -36,12 +38,14 @@ export default class PGP extends Component {
 
   handleGetBlockstack(e) {
     const options = { decrypt: true }
-    getFile('pgp.json', options)
+    getFile(FILE, options)
       .then((file) => {
         const pgp = JSON.parse(file || '{}')
         const { publicKey, privateKey, passphrase } = pgp
         this.setState({ publicKey, privateKey, passphrase })
         console.log('Recovering PGP data from Blockstack')
+      }).catch((error) => {
+        console.log('Could not save PGP from Blockstack')
       })
   }
 
@@ -49,9 +53,11 @@ export default class PGP extends Component {
     const options = { encrypt: true }
     const { privateKey, publicKey, passphrase } = this.state
     const save = { privateKey, publicKey, passphrase }
-    putFile('pgp.json', JSON.stringify(save), options)
+    putFile(FILE, JSON.stringify(save), options)
       .then(() => {
         console.log('Saved PGP data to Blockstack')
+      }).catch((error) => {
+        console.log('Could not retrieve PGP from Blockstack')
       })
   }
 
@@ -68,6 +74,8 @@ export default class PGP extends Component {
         publicKey: key.publicKeyArmored,
         revocationSignature: key.revocationSignature
       })
+    }).catch((error) => {
+      console.log('Could not generate key with openpgp')
     }).then(() => {
       this.putBlockstack()
     })
@@ -86,6 +94,8 @@ export default class PGP extends Component {
         this.setState({
           encryptedMessage: ciphertext.data
         })
+      }).catch((error) => {
+        console.log("Could not encrypt message on openpgp")
       })
     })
   }
@@ -106,6 +116,8 @@ export default class PGP extends Component {
         privateKeys: privKeyObj
       }
       return openpgp.decrypt(options)
+    }).catch((error) => {
+      console.log("Could not decrypt message on openpgp")
     }).then((plainText) => {
       this.setState({
         decryptedMessage: plainText.data
@@ -123,7 +135,7 @@ export default class PGP extends Component {
       privateKey,
       publicKey } = this.state
 
-    const hasPassphrase = !passphrase
+    const hasPassphrase = !!passphrase
     const hasKeys = privateKey && publicKey
 
     return (
@@ -155,7 +167,7 @@ export default class PGP extends Component {
               bsStyle="primary"
               bsSize="small"
               onClick={this.createKeys.bind(this)}
-              disabled={hasPassphrase}
+              disabled={!hasPassphrase}
             >Create New / Save to Blockstack</Button></label>
           </h4>
           <Panel>
