@@ -8,6 +8,7 @@ import {
   handlePendingSignIn,
   signUserOut,
 } from 'blockstack';
+import PGP from './PGP.jsx'
 
 export default class App extends Component {
 
@@ -28,14 +29,15 @@ export default class App extends Component {
 
   render() {
     return (
-      <div className="site-wrapper">
-        <div className="site-wrapper-inner">
-          {!isUserSignedIn() ?
-            <Signin handleSignIn={this.handleSignIn} />
-            : <Profile handleSignOut={this.handleSignOut} />
-          }
+      <div>
+        {!isUserSignedIn() ?
+          <Signin handleSignIn={this.handleSignIn} />
+          : <div>
+            <Profile handleSignOut={this.handleSignOut} />
+            <PGP />
+          </div>
+        }
         </div>
-      </div>
     );
   }
 
