@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import * as openpgp from 'openpgp'
 import userGen from 'username-generator'
-
 import { Button, FormControl, Panel } from 'react-bootstrap'
+import {
+  putFile
+} from 'blockstack'
 
 export default class PGP extends Component {
   constructor(props) {
@@ -19,22 +21,6 @@ export default class PGP extends Component {
     }
   }
 
-  createKeys() {
-    const user = userGen.generateUsername()
-    const options = {
-      userIds: [{ name: `${user}`, email: `${user}@test.com` }],
-      curve: "p521",
-      passphrase: this.state.passphrase
-    };
-    openpgp.generateKey(options).then((key) => {
-      this.setState({
-        privateKey: key.privateKeyArmored,
-        publicKey: key.publicKeyArmored,
-        revocationSignature: key.revocationSignature
-      })
-    });
-  }
-
   updatePassphrase(e) {
     this.setState({ passphrase: e.target.value })
   }
@@ -45,6 +31,39 @@ export default class PGP extends Component {
 
   updatePGPEncryptedMessage(e) {
     this.setState({ pgpEncryptedMessage: e.target.value })
+  }
+
+  putBlockstack() {
+    const options = { encrypt: true }
+    const { privateKey, publicKey, passphrase } = this.state
+    const save = { privateKey, publicKey, passphrase }
+    putFile('pgp.json', JSON.stringify(save), options)
+      .then(() => {
+        console.log('Saved PGP data to Blockstack')
+        return
+      })
+  }
+
+  getBlockstack() {
+
+  }
+
+  createKeys() {
+    const user = userGen.generateUsername()
+    const options = {
+      userIds: [{ name: `${user}`, email: `${user}@test.com` }],
+      curve: "p521",
+      passphrase: this.state.passphrase
+    };
+    openpgp.generateKey(options).then((key) => {
+      return this.setState({
+        privateKey: key.privateKeyArmored,
+        publicKey: key.publicKeyArmored,
+        revocationSignature: key.revocationSignature
+      })
+    }).then(() => {
+      this.putBlockstack()
+    })
   }
 
   encryptMessage() {
@@ -110,7 +129,7 @@ export default class PGP extends Component {
             <Panel.Heading>Enter Passphrase</Panel.Heading>
             <Panel.Body>
             <FormControl
-                type="text"
+                type="password"
                 value={passphrase}
                 placeholder="Enter passphrase to create / unlock private key"
                 onChange={this.updatePassphrase.bind(this)}
