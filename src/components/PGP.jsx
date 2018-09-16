@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import * as openpgp from 'openpgp'
 import userGen from 'username-generator'
-import { Button, FormControl, Panel } from 'react-bootstrap'
+import { Alert, Button, FormControl, Panel } from 'react-bootstrap'
 import {
   putFile,
   getFile
@@ -123,10 +123,16 @@ export default class PGP extends Component {
       privateKey,
       publicKey } = this.state
 
-    const disableButtons = !passphrase
+    const hasPassphrase = !passphrase
+    const hasKeys = privateKey && publicKey
 
     return (
       <div>
+        <div>
+          <Alert bsStyle="warning">
+            Already have a PGP saved on Blockstack? <a href="#" onClick={this.handleGetBlockstack.bind(this)}>Click here to recover</a>
+          </Alert>
+        </div>
         <div>
           <h4>
             Passphrase
@@ -134,7 +140,7 @@ export default class PGP extends Component {
           <Panel>
             <Panel.Heading>Enter Passphrase</Panel.Heading>
             <Panel.Body>
-            <FormControl
+              <FormControl
                 type="password"
                 value={passphrase}
                 placeholder="Enter passphrase to create / unlock private key"
@@ -149,12 +155,8 @@ export default class PGP extends Component {
               bsStyle="primary"
               bsSize="small"
               onClick={this.createKeys.bind(this)}
-              disabled={disableButtons}
-            >Create New / Save to Blockstack</Button></label> <label><Button
-              bsStyle="success"
-              bsSize="small"
-              onClick={this.handleGetBlockstack.bind(this)}
-            >Get Saved from Blockstack</Button></label>
+              disabled={hasPassphrase}
+            >Create New / Save to Blockstack</Button></label>
           </h4>
           <Panel>
             <Panel.Heading>Public Key</Panel.Heading>
@@ -171,6 +173,7 @@ export default class PGP extends Component {
               bsStyle="primary"
               bsSize="small"
               onClick={this.encryptMessage.bind(this)}
+              disabled={!hasKeys}
             >Encrypt</Button></label>
           </h4>
           <Panel>
@@ -195,7 +198,7 @@ export default class PGP extends Component {
               bsStyle="primary"
               bsSize="small"
               onClick={this.decryptMessage.bind(this)}
-              disabled={disableButtons}
+              disabled={!hasKeys}
             >Decrypt</Button></label>
           </h4>
           <Panel>

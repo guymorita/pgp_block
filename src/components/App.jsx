@@ -9,7 +9,7 @@ import {
   signUserOut,
 } from 'blockstack';
 import PGP from './PGP.jsx'
-import { Grid, Row, Col } from 'react-bootstrap'
+import { Grid, Row, Col, Navbar } from 'react-bootstrap'
 
 export default class App extends Component {
 
@@ -30,19 +30,30 @@ export default class App extends Component {
 
   render() {
     return (
-      <Grid>
-        <Row className="show-grid">
-          <Col xs={8} xsOffset={2}>
-            {!isUserSignedIn() ?
-              <Signin handleSignIn={this.handleSignIn} />
-              : <div>
-                <Profile handleSignOut={this.handleSignOut} />
-                <PGP />
-              </div>
+      <div>
+        <Navbar inverse collapseOnSelect>
+          <Navbar.Header>
+            <Navbar.Brand>
+              PGP Block
+            </Navbar.Brand>
+          </Navbar.Header>
+          <Navbar.Collapse>
+            {isUserSignedIn() ?
+              <Profile handleSignOut={this.handleSignOut} /> : <div></div>
             }
-          </Col>
-        </Row>
-      </Grid>
+          </Navbar.Collapse>
+        </Navbar>
+        <Grid>
+          <Row className="show-grid">
+            <Col xs={8} xsOffset={2}>
+            {!isUserSignedIn() ?
+                <Signin handleSignIn={this.handleSignIn} />
+                : <PGP />
+              }
+            </Col>
+          </Row>
+        </Grid>
+      </div>
     );
   }
 
