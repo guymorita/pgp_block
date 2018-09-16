@@ -12,12 +12,13 @@ import {
 export default class App extends Component {
 
   constructor(props) {
-  	super(props);
+    super(props);
   }
 
   handleSignIn(e) {
     e.preventDefault();
-    redirectToSignIn();
+    const origin = window.location.origin
+    redirectToSignIn(origin, origin + '/manifest.json', ['store_write', 'publish_data'])
   }
 
   handleSignOut(e) {
@@ -29,9 +30,9 @@ export default class App extends Component {
     return (
       <div className="site-wrapper">
         <div className="site-wrapper-inner">
-          { !isUserSignedIn() ?
-            <Signin handleSignIn={ this.handleSignIn } />
-            : <Profile handleSignOut={ this.handleSignOut } />
+          {!isUserSignedIn() ?
+            <Signin handleSignIn={this.handleSignIn} />
+            : <Profile handleSignOut={this.handleSignOut} />
           }
         </div>
       </div>
