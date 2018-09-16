@@ -29,10 +29,10 @@ export default class Profile extends Component {
     return (
       !isSignInPending() ?
       <div className="panel-welcome" id="section-2">
-        <h1>Hello, <span id="heading-name">{ person.name() ? person.name() : 'Nameless Person' }</span>!</h1>
+        <h4>Hello, <span id="heading-name">{ person.name() ? person.name() : 'Nameless Person' }</span>!</h4>
         <p className="lead">
           <button
-            className="btn btn-primary btn-lg"
+            className="btn btn-primary btn-sm"
             id="signout-button"
             onClick={ handleSignOut.bind(this) }
           >

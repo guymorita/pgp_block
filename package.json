@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "blockstack": "^0.15.0",
+    "openpgp": "^4.0.1",
     "react": "^15.5.4",
     "react-bootstrap": "^0.32.4",
     "react-dom": "^15.5.4"

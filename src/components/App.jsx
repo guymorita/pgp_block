@@ -32,7 +32,7 @@ export default class App extends Component {
     return (
       <Grid>
         <Row className="show-grid">
-          <Col xs={6} xsOffset={3}>
+          <Col xs={8} xsOffset={2}>
             {!isUserSignedIn() ?
               <Signin handleSignIn={this.handleSignIn} />
               : <div>
