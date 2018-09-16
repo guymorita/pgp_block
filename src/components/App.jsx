@@ -9,6 +9,7 @@ import {
   signUserOut,
 } from 'blockstack';
 import PGP from './PGP.jsx'
+import { Grid, Row, Col } from 'react-bootstrap'
 
 export default class App extends Component {
 
@@ -29,15 +30,19 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>
-        {!isUserSignedIn() ?
-          <Signin handleSignIn={this.handleSignIn} />
-          : <div>
-            <Profile handleSignOut={this.handleSignOut} />
-            <PGP />
-          </div>
-        }
-        </div>
+      <Grid>
+        <Row className="show-grid">
+          <Col xs={6} xsOffset={3}>
+            {!isUserSignedIn() ?
+              <Signin handleSignIn={this.handleSignIn} />
+              : <div>
+                <Profile handleSignOut={this.handleSignOut} />
+                <PGP />
+              </div>
+            }
+          </Col>
+        </Row>
+      </Grid>
     );
   }
 
