@@ -13,11 +13,11 @@ export default class PGP extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      privateKey: null,
-      publicKey: null,
-      revocationSignature: null,
-      encryptedMessage: null,
+      privateKey: "",
+      publicKey: "",
+      encryptedMessage: "",
       messageToEncrypt: "",
+      publicKeyToEncrypt: "",
       pgpEncryptedMessage: "",
       decryptedMessage: "",
       passphrase: ""
@@ -26,6 +26,10 @@ export default class PGP extends Component {
 
   handlePassphrase(e) {
     this.setState({ passphrase: e.target.value })
+  }
+
+  handlePGPPublicKey(e) {
+    this.setState({ publicKeyToEncrypt: e.target.value })
   }
 
   handleMessage(e) {
@@ -71,8 +75,7 @@ export default class PGP extends Component {
     openpgp.generateKey(options).then((key) => {
       return this.setState({
         privateKey: key.privateKeyArmored,
-        publicKey: key.publicKeyArmored,
-        revocationSignature: key.revocationSignature
+        publicKey: key.publicKeyArmored
       })
     }).catch((error) => {
       console.log('Could not generate key with openpgp')
@@ -82,8 +85,8 @@ export default class PGP extends Component {
   }
 
   encryptMessage() {
-    const { messageToEncrypt, publicKey, passphrase } = this.state
-    openpgp.key.readArmored(publicKey).then((keys) => {
+    const { messageToEncrypt, publicKeyToEncrypt } = this.state
+    openpgp.key.readArmored(publicKeyToEncrypt).then((keys) => {
       return keys
     }).then((keys) => {
       const options = {
@@ -95,7 +98,7 @@ export default class PGP extends Component {
           encryptedMessage: ciphertext.data
         })
       }).catch((error) => {
-        console.log("Could not encrypt message on openpgp")
+        console.log("Could not encrypt message on openpgp", error)
       })
     })
   }
@@ -130,6 +133,7 @@ export default class PGP extends Component {
       pgpEncryptedMessage,
       decryptedMessage,
       messageToEncrypt,
+      publicKeyToEncrypt,
       encryptedMessage,
       passphrase,
       privateKey,
@@ -172,11 +176,21 @@ export default class PGP extends Component {
           </h4>
           <Panel>
             <Panel.Heading>Public Key</Panel.Heading>
-            <Panel.Body>{publicKey}</Panel.Body>
+            <Panel.Body>
+              <FormControl
+                componentClass="textarea"
+                value={publicKey}
+              />
+            </Panel.Body>
           </Panel>
           <Panel>
             <Panel.Heading>Private Key</Panel.Heading>
-            <Panel.Body>{privateKey}</Panel.Body>
+            <Panel.Body>
+              <FormControl
+                componentClass="textarea"
+                value={privateKey}
+              />
+            </Panel.Body>
           </Panel>
         </div>
         <div>
@@ -188,6 +202,17 @@ export default class PGP extends Component {
               disabled={!hasKeys}
             >Encrypt</Button></label>
           </h4>
+          <Panel>
+            <Panel.Heading>PGP Public Key</Panel.Heading>
+            <Panel.Body>
+              <FormControl
+                componentClass="textarea"
+                value={publicKeyToEncrypt}
+                placeholder="Enter PGP Public Key to encrypt message"
+                onChange={this.handlePGPPublicKey.bind(this)}
+              />
+            </Panel.Body>
+          </Panel>
           <Panel>
             <Panel.Heading>Message to Encrypt</Panel.Heading>
             <Panel.Body>
@@ -201,7 +226,12 @@ export default class PGP extends Component {
           </Panel>
           <Panel>
             <Panel.Heading>Encrypted Message</Panel.Heading>
-            <Panel.Body>{encryptedMessage}</Panel.Body>
+            <Panel.Body>
+              <FormControl
+                componentClass="textarea"
+                value={encryptedMessage}
+              />
+            </Panel.Body>
           </Panel>
         </div>
         <div>
@@ -226,7 +256,12 @@ export default class PGP extends Component {
           </Panel>
           <Panel>
             <Panel.Heading>Decrypted Message</Panel.Heading>
-            <Panel.Body>{decryptedMessage}</Panel.Body>
+            <Panel.Body>
+              <FormControl
+                componentClass="textarea"
+                value={decryptedMessage}
+              />
+            </Panel.Body>
           </Panel>
         </div>
       </div>
