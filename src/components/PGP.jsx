@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import * as openpgp from 'openpgp'
+import userGen from 'username-generator'
 
 import { Button, FormControl, Panel } from 'react-bootstrap'
 
@@ -14,14 +15,15 @@ export default class PGP extends Component {
       messageToEncrypt: "",
       pgpEncryptedMessage: "",
       decryptedMessage: "",
-      passphrase: "Big things have small beginnings"
+      passphrase: ""
     }
   }
 
   createKeys() {
+    const user = userGen.generateUsername()
     const options = {
-      userIds: [{ name: 'Jon Smith', email: 'jon@example.com' }], // multiple user IDs
-      curve: "p256",                                         // ECC curve name
+      userIds: [{ name: `${user}`, email: `${user}@test.com` }],
+      curve: "p521",
       passphrase: this.state.passphrase
     };
     openpgp.generateKey(options).then((key) => {
@@ -31,6 +33,10 @@ export default class PGP extends Component {
         revocationSignature: key.revocationSignature
       })
     });
+  }
+
+  updatePassphrase(e) {
+    this.setState({ passphrase: e.target.value })
   }
 
   updateMessage(e) {
@@ -67,9 +73,7 @@ export default class PGP extends Component {
       privKeyObj = p.keys[0]
       return privKeyObj.decrypt(passphrase)
     }).then((status) => {
-      console.log(privKeyObj)
       return openpgp.message.readArmored(encryptedMessage)
-
     }).then((parsedMessage) => {
       const options = {
         message: parsedMessage,
@@ -90,20 +94,42 @@ export default class PGP extends Component {
       decryptedMessage,
       messageToEncrypt,
       encryptedMessage,
+      passphrase,
       privateKey,
       publicKey } = this.state
+
+    const disableButtons = !passphrase
+
     return (
       <div>
+        <div>
+          <h4>
+            Passphrase
+          </h4>
+          <Panel>
+            <Panel.Heading>Enter Passphrase</Panel.Heading>
+            <Panel.Body>
+            <FormControl
+                type="text"
+                value={passphrase}
+                placeholder="Enter passphrase to create / unlock private key"
+                onChange={this.updatePassphrase.bind(this)}
+              />
+            </Panel.Body>
+          </Panel>
+        </div>
         <div>
           <h4>
             Create Keys <label><Button
               bsStyle="primary"
               bsSize="small"
               onClick={this.createKeys.bind(this)}
+              disabled={disableButtons}
             >Create New / Save to Blockstack</Button></label> <label><Button
               bsStyle="success"
               bsSize="small"
               onClick={this.createKeys.bind(this)}
+              disabled={disableButtons}
             >Get Saved from Blockstack</Button></label>
           </h4>
           <Panel>
@@ -145,6 +171,7 @@ export default class PGP extends Component {
               bsStyle="primary"
               bsSize="small"
               onClick={this.decryptMessage.bind(this)}
+              disabled={disableButtons}
             >Decrypt</Button></label>
           </h4>
           <Panel>
