@@ -3,7 +3,8 @@ import * as openpgp from 'openpgp'
 import userGen from 'username-generator'
 import { Button, FormControl, Panel } from 'react-bootstrap'
 import {
-  putFile
+  putFile,
+  getFile
 } from 'blockstack'
 
 export default class PGP extends Component {
@@ -21,16 +22,27 @@ export default class PGP extends Component {
     }
   }
 
-  updatePassphrase(e) {
+  handlePassphrase(e) {
     this.setState({ passphrase: e.target.value })
   }
 
-  updateMessage(e) {
+  handleMessage(e) {
     this.setState({ messageToEncrypt: e.target.value })
   }
 
-  updatePGPEncryptedMessage(e) {
+  handlePGPEncryptedMessage(e) {
     this.setState({ pgpEncryptedMessage: e.target.value })
+  }
+
+  handleGetBlockstack(e) {
+    const options = { decrypt: true }
+    getFile('pgp.json', options)
+      .then((file) => {
+        const pgp = JSON.parse(file || '{}')
+        const { publicKey, privateKey, passphrase } = pgp
+        this.setState({ publicKey, privateKey, passphrase })
+        console.log('Recovering PGP data from Blockstack')
+      })
   }
 
   putBlockstack() {
@@ -40,12 +52,7 @@ export default class PGP extends Component {
     putFile('pgp.json', JSON.stringify(save), options)
       .then(() => {
         console.log('Saved PGP data to Blockstack')
-        return
       })
-  }
-
-  getBlockstack() {
-
   }
 
   createKeys() {
@@ -103,7 +110,6 @@ export default class PGP extends Component {
       this.setState({
         decryptedMessage: plainText.data
       })
-      return
     })
   }
 
@@ -132,7 +138,7 @@ export default class PGP extends Component {
                 type="password"
                 value={passphrase}
                 placeholder="Enter passphrase to create / unlock private key"
-                onChange={this.updatePassphrase.bind(this)}
+                onChange={this.handlePassphrase.bind(this)}
               />
             </Panel.Body>
           </Panel>
@@ -147,8 +153,7 @@ export default class PGP extends Component {
             >Create New / Save to Blockstack</Button></label> <label><Button
               bsStyle="success"
               bsSize="small"
-              onClick={this.createKeys.bind(this)}
-              disabled={disableButtons}
+              onClick={this.handleGetBlockstack.bind(this)}
             >Get Saved from Blockstack</Button></label>
           </h4>
           <Panel>
@@ -175,7 +180,7 @@ export default class PGP extends Component {
                 componentClass="textarea"
                 value={messageToEncrypt}
                 placeholder="Enter text to encrypt"
-                onChange={this.updateMessage.bind(this)}
+                onChange={this.handleMessage.bind(this)}
               />
             </Panel.Body>
           </Panel>
@@ -200,7 +205,7 @@ export default class PGP extends Component {
                 componentClass="textarea"
                 value={pgpEncryptedMessage}
                 placeholder="Enter PGP Message"
-                onChange={this.updatePGPEncryptedMessage.bind(this)}
+                onChange={this.handlePGPEncryptedMessage.bind(this)}
               />
             </Panel.Body>
           </Panel>
